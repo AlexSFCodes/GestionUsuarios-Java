@@ -1,49 +1,65 @@
 package udla.asango.empresa;
-import udla.asango.empresa.dao.UsuarioDao;
-import udla.asango.empresa.database.DBConfig;
-import udla.asango.empresa.modelo.Usuario;
 
-import java.sql.Connection;
+import udla.asango.empresa.dao.ClienteDAO;
+import udla.asango.empresa.dao.MedicamentoDAO;
+import udla.asango.empresa.dao.VentaDAO;
+
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
 
-        // Verificar conexión
-        try (Connection conn = DBConfig.getConnection()) {
-            System.out.println("✅ Conexión exitosa a MySQL");
-        } catch (Exception e) {
-            System.out.println("❌ Error de conexión");
-            return;
-        }
-
         Scanner sc = new Scanner(System.in);
-        UsuarioDao dao = new UsuarioDao();
+        ClienteDAO clienteDAO = new ClienteDAO();
+        var medDAO = new MedicamentoDAO();
+        VentaDAO ventaDAO = new VentaDAO();
 
-        System.out.println("""
-                -- MENÚ --
-                1. Ingresar usuario
-                2. Mostrar usuarios
-                """);
+        int op;
 
-        int opc = sc.nextInt();
-        sc.nextLine(); // limpiar buffer
+        do {
+            System.out.println("\n=== FARMACIA ===");
+            System.out.println("1. Registrar cliente");
+            System.out.println("2. Registrar medicamento");
+            System.out.println("3. Listar medicamentos");
+            System.out.println("4. Realizar venta");
+            System.out.println("0. Salir");
+            System.out.print("Opción: ");
+            op = sc.nextInt();
 
-        switch (opc) {
-            case 1 -> {
-                System.out.print("Nombre: ");
-                String nombre = sc.nextLine();
+            switch (op) {
+                case 1:
+                    sc.nextLine();
+                    System.out.print("Nombre: ");
+                    clienteDAO.insertar(sc.nextLine(), sc.next());
+                    break;
 
-                System.out.print("Correo: ");
-                String correo = sc.nextLine();
+                case 2:
+                    sc.nextLine();
+                    System.out.print("Nombre: ");
+                    String n = sc.nextLine();
+                    System.out.print("Precio: ");
+                    double p = sc.nextDouble();
+                    System.out.print("Stock: ");
+                    int s = sc.nextInt();
+                    medDAO.insertar(n, p, s);
+                    break;
 
-                Usuario u = new Usuario(nombre, correo);
-                dao.insertarUsuario(u);
+                case 3:
+                    medDAO.listar();
+                    break;
+
+                case 4:
+                    System.out.print("ID Cliente: ");
+                    int c = sc.nextInt();
+                    System.out.print("ID Medicamento: ");
+                    int m = sc.nextInt();
+                    System.out.print("Cantidad: ");
+                    int q = sc.nextInt();
+                    System.out.print("Precio unitario: ");
+                    double pr = sc.nextDouble();
+                    ventaDAO.registrarVenta(c, m, q, pr);
+                    break;
             }
-
-            case 2 -> dao.mostrarUsuarios();
-
-            default -> System.out.println("❌ Opción inválida");
-        }
+        } while (op != 0);
     }
 }
